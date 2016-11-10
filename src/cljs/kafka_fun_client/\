@@ -1,0 +1,60 @@
+(ns kafka-fun-client.core
+    (:require [reagent.core :as reagent :refer [atom]]
+              [reagent.session :as session]
+              [secretary.core :as secretary :include-macros true]
+              [accountant.core :as accountant]
+              [ajax.core :refer [POST]]))
+
+(defn send-data []
+  (js/console.log {:params {:page-url (-> js/window .location .href)
+                            :user-agent (-> js/navigator .useragent)}})
+  #_(POST "/send-data" {:params {:page-url (-> window .location .href)
+                                 :user-agent (.useragent navigator)}}))
+
+(def searchbox-input (atom ""))
+
+(defn home-page []
+  [:div [:h2 "Welcome to kafka-fun-client"]
+   [:div [:a {:href "/about"} "go to about page"]]
+   #_[:form
+    [:label {:for "searchbox"} "Search something... Nothing will happen"]
+    [:br]
+    [:input
+     {:type "input"
+      :name "searchbox"
+      :value @searchbox-input
+      :on-change #(reset! searchbox-input (-> % .-target .-value))}]]])
+
+(defn about-page []
+  [:div [:h2 "About kafka-fun-client"]
+   [:div [:a {:href "/"} "go to the home page"]]])
+
+(defn current-page []
+  [:div [(session/get :current-page)]])
+
+;; -------------------------
+;; Routes
+
+(secretary/defroute "/" []
+  (session/put! :current-page #'home-page))
+
+(secretary/defroute "/about" []
+  (session/put! :current-page #'about-page))
+
+;; -------------------------
+;; Initialize app
+
+(defn mount-root []
+  (reagent/render [current-page] (.getElementById js/document "app")))
+
+(defn init! []
+  (send-data)
+  (accountant/configure-navigation!
+    {:nav-handler
+     (fn [path]
+       (secretary/dispatch! path))
+     :path-exists?
+     (fn [path]
+       (secretary/locate-route path))})
+  (accountant/dispatch-current!)
+  (mount-root))
