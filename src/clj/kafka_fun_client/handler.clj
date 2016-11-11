@@ -4,7 +4,13 @@
             [hiccup.page :refer [include-js include-css html5]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
             [kafka-fun-client.middleware :refer [wrap-middleware]]
-            [config.core :refer [env]]))
+            [kinsky.client :as client]
+            [config.core :refer [env]]
+            [clojure.string :as str]))
+
+(def p (client/producer {:bootstrap.servers "localhost:9092"}
+                        (client/keyword-serializer)
+                        (client/edn-serializer)))
 
 (def mount-target
   [:div#app
@@ -28,7 +34,8 @@
      (include-js "/js/app.js")]))
 
 (defn send [page-url user-agent]
-  (str page-url ", " user-agent))
+  (client/send! p "user-tracking" :user { :page-url page-url :user-agent user-agent })
+  "OK")
 
 (defroutes routes
   (GET "/" [] (loading-page))
