@@ -27,12 +27,15 @@
      mount-target
      (include-js "/js/app.js")]))
 
+(defn send [page-url user-agent]
+  (str page-url ", " user-agent))
 
 (defroutes routes
   (GET "/" [] (loading-page))
   (GET "/about" [] (loading-page))
   (GET "/contact" [] (loading-page))
-  (POST "/send-data" [] "test")
+  (GET "/send-data" [page-url user-agent]
+    (send page-url user-agent))
 
   (resources "/")
   (not-found "Not Found"))

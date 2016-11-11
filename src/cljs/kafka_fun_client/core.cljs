@@ -3,13 +3,14 @@
               [reagent.session :as session]
               [secretary.core :as secretary :include-macros true]
               [accountant.core :as accountant]
-              [ajax.core :refer [POST]]))
+              [ajax.core :refer [GET]]))
 
 (enable-console-print!)
 
 (defn send-data []
-  (POST "/send-data" {:params {:component-url (-> js/window .-location .-href)
-                               :user-agent (-> js/navigator .-userAgent)}}))
+  ;; GET because I did'nt get POST working.
+  (GET "/send-data" {:params {:page-url (-> js/window .-location .-href)
+                              :user-agent (-> js/navigator .-userAgent)}}))
 
 ;; TODO: maybe make macro
 (defn home-component []
