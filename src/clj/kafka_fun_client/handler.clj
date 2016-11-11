@@ -34,7 +34,9 @@
      (include-js "/js/app.js")]))
 
 (defn send [page-url user-agent]
-  (client/send! p "user-tracking" :user { :page-url page-url :user-agent user-agent })
+  (client/send! p "user-tracking" :user { :timestamp (int (/ (.getTime (java.util.Date.)) 1000))
+                                          :page-url page-url :user-agent user-agent })
+  ;; TODO: make some kind of error handling here.
   "OK")
 
 (defroutes routes
